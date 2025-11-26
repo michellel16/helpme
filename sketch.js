@@ -121,17 +121,17 @@ let cardY = height / 2 - cardH / 2;
 
 let exitSize = 25 * scale;
 let exitX = cardX + cardW - exitSize - 10 * scale;
-let exitY = cardY + 17 * scale;
+let exitY = cardY + 20 * scale;
 
 let buttonLayouts = {
-  start: {x: width / 2 - 80 * scaleX, y: height / 2 + 140 * scaleY, w: 160 * scale, h: 60 * scale},
+  start: {x: width / 2 - (160 * scale) / 2, y: height / 2 + (140 * scale),w: 160 * scale, h: 60 * scale},
   infoCard: {
     exit: {x: exitX, y: exitY, w: exitSize, h: exitSize},
-    ranger: {x: cardX + cardW / 2 - (135 * scale) / 2, y: cardY + cardH - (40 * scale) - 20 * scale, w: 135 * scale, h: 40 * scale}
+    ranger: {x: cardX + cardW / 2 - (135 * scale) / 2, y: cardY + cardH - (40 * scale) - 30 * scale, w: 135 * scale, h: 40 * scale}
   },
   mail: {x: exitX, y: exitY, w: exitSize, h: exitSize},
   mailIcon: {x: 35 * scale, y: height - 80 * scale, w: 50 * scale, h: 50 * scale},
-  userName: {x: width / 2 - 80 * scaleX, y: height / 2 + 70 * scaleY, w: 160 * scale, h: 60 * scale}
+  userName: {x: width / 2 - (160 * scale) / 2, y: height / 2 + (70 * scale), w: 160 * scale, h: 60 * scale}
 };
 
 function setup() {
@@ -171,7 +171,6 @@ function mousePressed() {
 
 function touchStarted() {
   mousePressed();
-  return false;
 }
 
 function touchMoved() {
@@ -188,7 +187,9 @@ function handleStartClick() {
 }
 
 function handleUsernameInputClick() {
-  if (isMouseInside(width / 2 - 80, height / 2 + 100, 160, 60)) {
+  const b = buttonLayouts.userName;
+  
+  if (isMouseInside(b.x, b.y, b.w, b.h)) {
     if (username.trim() === "") username = "User";
     
     usernameInputActive = false;
@@ -309,7 +310,7 @@ function handleMailLetter(a) {
   if (a.action == "Relocated") action = "has been safely relocated.";
   else if (a.action == "Taken to ACC") action = "has been safely taken to the Animal Care Center.";
   else if (a.action == "Not Found") action = "was unable to be found.";
-  else if (a.action == "Advised or Educated Others") action = "has been left undisturbed. This provided a great opportunity to educate others on how to treat our wildlife friends and habitats with respect.";
+  else if (a.action == "Advised or Educated Others") action = "has been left undisturbed. This provided a great opportunity to educate others on how to treat our wildlife friends with respect.";
   else if (a.action == "Monitored") action = "is currently being monitored by fellow park rangers.";
   else if (a.action == "Rehabilitated") action = "is being rehabilitated by animal caretakers.";
   else if (a.action == "Submitted for DEC Testing") action = "has been submitted for DEC testing.";
@@ -406,35 +407,40 @@ function drawStartScreen() {
 
   fill(255, 255, 255, 150);
   rectMode(CENTER);
-  rect(width / 2, height / 2 - 60 * scaleY, 320 * scale, 160 * scale);
-  rect(width / 2, height / 2 + 100 * scaleY, 250 * scale, 50 * scale);
+  rect(width / 2, height / 2 - 60 * scale, 320 * scale, 160 * scale);
+  rect(width / 2, height / 2 + 100 * scale, 250 * scale, 50 * scale);
   rectMode(CORNER);
 
   textFont(pixelfont);
   textAlign(CENTER, CENTER);
   textSize(60 * scale);
   fill(0);
-  text(`The Wild \nWild Life`, width / 2, height / 2 - 65 * scaleY);
+  text(`The Wild \nWild Life`, width / 2, height / 2 - 65 * scale);
 
   textSize(25 * scale);
   fill(0);
-  text(`Protect NYC's Wildlife!`, width / 2, height / 2 + 100 * scaleY);
+  text("Protect NYC's Wildlife!", width / 2, height / 2 + 100 * scale);
 
   const b = buttonLayouts.start;
   drawButton(b.x, b.y, b.w, b.h, "Start", 40 * scale);
 
-  let textPulse = 30 + sin(millis() * 0.003) * 2;
-  push();
-  
   // NYC Banner
-  translate(width / 2 + 50 * scale, height / 2 - 5 * scale);
+  let textPulse = 30 + sin(millis() * 0.003) * 2;
+  let bannerX = width / 2 + 125 * scale;
+  let bannerY = height / 2 + 10 * scale;
+ 
+  push();
+  translate(bannerX, bannerY);
   rotate(radians(-25));
+
+  rectMode(CENTER);
   fill("yellow");
   rect(0, 0, 160 * scale, 50 * scale);
+
   fill(0);
   textSize(textPulse * scale);
   textAlign(CENTER, CENTER);
-  text(`NYC Edition`, 81 * scale, 21 * scale);
+  text("NYC Edition", 0, 0);
   pop();
 }
 
@@ -444,19 +450,19 @@ function drawUsernameInputScreen() {
   fill(0);
   textSize(40 * scale);
   textAlign(CENTER, CENTER);
-  text("Enter Your Name", width / 2, height / 2 - 90 * scaleY);
+  text("Enter Your Name", width / 2, height / 2 - 90 * scale);
 
   rectMode(CENTER);
   fill(255);
   stroke(0);
-  rect(width / 2, height / 2 - 5 * scaleY, 250 * scaleX, 50 * scaleY, 10 * scale);
+  rect(width / 2, height / 2 - 5 * scale, 275 * scale, 50 * scale, 10 * scale);
 
   rectMode(CORNER);
   noStroke();
   fill(0);
   textAlign(CENTER, CENTER);
   textSize(30 * scale);
-  text(username || "Click To Type..", width / 2, height / 2 - 5 * scaleY); 
+  text(username || "Click To Type..", width / 2, height / 2 - 5 * scale); 
   
   const b = buttonLayouts.userName;
   drawButton(b.x, b.y, b.w, b.h, "Continue", 30 * scale);
@@ -531,7 +537,6 @@ function drawInfoCard() {
   text("🕻", rangerB.x - 20 * scale, rangerB.y + 23 * scale);
   textFont(pixelfont);
   
-  textSize(23 * scale);
   drawButton(rangerB.x, rangerB.y, rangerB.w, rangerB.h, "Call Ranger?", 21 * scale);
 }
 
@@ -555,8 +560,8 @@ function drawMailLetter() {
   
   let wrapWidth = 250 * scale;
 
-  text(mailMessage.text1, width / 2 - 30 * scale, height / 2 - 115 * scale, wrapWidth);
-  text(mailMessage.text2, width / 2 - 200 * scale, height / 2 + 55 * scale, wrapWidth * 2 - 83 * scale);
+  text(mailMessage.text1, width / 2 - 30 * scale, height / 2 - 118 * scale, wrapWidth);
+  text(mailMessage.text2, width / 2 - 200 * scale, height / 2 + 47 * scale, wrapWidth * 2 - 83 * scale);
   text(mailMessage.id, width / 2 - 200 * scale, height / 2 + 135 * scale);   
 
   const b = buttonLayouts.mail;
