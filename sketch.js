@@ -2,6 +2,12 @@ let gameState = "start";
 let width = window.innerWidth;
 let height = window.innerHeight;
 
+let baseWidth = 600;
+let baseHeight = 600;
+let scaleX = width / baseWidth;
+let scaleY = height / baseHeight;
+let scale = Math.min(scaleX, scaleY);
+
 let welcome;
 let pixelfont;
 let currentLocation = 0;
@@ -10,8 +16,8 @@ let animalSprites = [];
 let currentRanger;
 
 let arrowButtons = {
-  left: {x: 50, y: height / 2 - 25, w: 50, h: 50},
-  right: {x: width - 100, y: height / 2 - 25, w: 50, h: 50}
+  left: {x: 50 * scale, y: height / 2 - 25 * scale, w: 50 * scale, h: 50 * scale},
+  right: {x: width - 50 * scale - 50 * scale, y: height / 2 - 25 * scale, w: 50 * scale, h: 50 * scale}
 };
 
 let username = "";
@@ -87,12 +93,11 @@ class Animal {
     this.action = data.action;
     this.imageIndex = data.imageIndex;
     
-    let xmargin = 50;
-    let ymargin = 150;
+    let xmargin = 50 * scaleX;
+    let ymargin = 150 * scaleY;
     this.x = random(xmargin, width - xmargin);
     this.y = random(height * 0.85, height - ymargin);
-
-    this.size = random(50,80);
+    this.size = random(50, 80) * scale;
   }
 
   display(x = null, y = null, size = null) {
@@ -105,47 +110,32 @@ class Animal {
     imageMode(CORNER);
     
     textAlign(CENTER);
-    textSize(12);
+    textSize(12 * scale);
   }
 }
 
+let cardW = 450 * scale;
+let cardH = 310 * scale;
+let cardX = width / 2 - cardW / 2;
+let cardY = height / 2 - cardH / 2;
+
+let exitSize = 25 * scale;
+let exitX = cardX + cardW - exitSize - 10 * scale;
+let exitY = cardY + 17 * scale;
+
 let buttonLayouts = {
-  start: {x: width / 2 - 80, y: height / 2 + 140, w: 160, h: 60},
+  start: {x: width / 2 - 80 * scaleX, y: height / 2 + 140 * scaleY, w: 160 * scale, h: 60 * scale},
   infoCard: {
-    exit: {x: width / 2 + 190, y: height / 2 - 135, w: 25, h: 25},
-    ranger: {x: width / 2 - 63, y: height / 2 + 85, w: 135, h: 40},
+    exit: {x: exitX, y: exitY, w: exitSize, h: exitSize},
+    ranger: {x: cardX + cardW / 2 - (135 * scale) / 2, y: cardY + cardH - (40 * scale) - 20 * scale, w: 135 * scale, h: 40 * scale}
   },
-  mail: {x: width / 2 + 190, y: height / 2 - 135, w: 25, h: 25},
-  mailIcon: {x: 30, y: height - 80, w: 50, h: 50}
+  mail: {x: exitX, y: exitY, w: exitSize, h: exitSize},
+  mailIcon: {x: 35 * scale, y: height - 80 * scale, w: 50 * scale, h: 50 * scale},
+  userName: {x: width / 2 - 80 * scaleX, y: height / 2 + 70 * scaleY, w: 160 * scale, h: 60 * scale}
 };
 
 function setup() {
   createCanvas(width, height);
-}
-
-function windowResized() {
-  width = window.innerWidth;
-  height = window.innerHeight;
-
-  resizeCanvas(width, height);
-  layoutUI();
-}
-
-function layoutUI() {
-  buttonLayouts = {
-  start: {x: width / 2 - 80, y: height / 2 + 140, w: 160, h: 60},
-  infoCard: {
-    exit: {x: width / 2 + 190, y: height / 2 - 135, w: 25, h: 25},
-    ranger: {x: width / 2 - 63, y: height / 2 + 85, w: 135, h: 40},
-  },
-  mail: {x: width / 2 + 190, y: height / 2 - 135, w: 25, h: 25},
-  mailIcon: {x: 30, y: height - 80, w: 50, h: 50}
-  };
-  
-  arrowButtons = {
-  left: {x: 50, y: height / 2 - 25, w: 50, h: 50},
-  right: {x: width - 100, y: height / 2 - 25, w: 50, h: 50}
-  };
 }
 
 function draw() {
@@ -184,6 +174,10 @@ function touchStarted() {
   return false;
 }
 
+function touchMoved() {
+  return false;
+}
+
 function handleStartClick() {
   const b = buttonLayouts.start;
   
@@ -194,7 +188,9 @@ function handleStartClick() {
 }
 
 function handleUsernameInputClick() {
-  if (isMouseInside(width / 2 - 80, height / 2 + 100, 160, 60) && username.trim() !== "") {
+  if (isMouseInside(width / 2 - 80, height / 2 + 100, 160, 60)) {
+    if (username.trim() === "") username = "User";
+    
     usernameInputActive = false;
     currentRanger = random(rangers);
     gameState = "play";
@@ -204,7 +200,8 @@ function handleUsernameInputClick() {
 function keyPressed() {
   if (gameState === "usernameInput" && usernameInputActive) {
     if (keyCode === BACKSPACE) username = username.slice(0, -1);
-    else if (keyCode === ENTER && username.trim() !== "") {
+    else if (keyCode === ENTER) {
+      if (username.trim() === "") username = "User";
       usernameInputActive = false;
       currentRanger = random(rangers);
       gameState = "play";
@@ -312,7 +309,7 @@ function handleMailLetter(a) {
   if (a.action == "Relocated") action = "has been safely relocated.";
   else if (a.action == "Taken to ACC") action = "has been safely taken to the Animal Care Center.";
   else if (a.action == "Not Found") action = "was unable to be found.";
-  else if (a.action == "Advised or Educated Others") action = "has been left undisturbed. This has provided a great opportunity to educate others on how to treat our wildlife friends and their habitats with respect.";
+  else if (a.action == "Advised or Educated Others") action = "has been left undisturbed. This provided a great opportunity to educate others on how to treat our wildlife friends and habitats with respect.";
   else if (a.action == "Monitored") action = "is currently being monitored by fellow park rangers.";
   else if (a.action == "Rehabilitated") action = "is being rehabilitated by animal caretakers.";
   else if (a.action == "Submitted for DEC Testing") action = "has been submitted for DEC testing.";
@@ -405,63 +402,64 @@ function respawnAnimals() {
 }
 
 function drawStartScreen() {
-  
-  image(welcome, 0, 0 , width, height);
+  image(welcome, 0, 0, width, height);
 
   fill(255, 255, 255, 150);
   rectMode(CENTER);
-  rect(width / 2, height / 2 - 60, 310, 150);
-  rect(width / 2, height / 2 + 100, 240, 50);
-  
-  
+  rect(width / 2, height / 2 - 60 * scaleY, 320 * scale, 160 * scale);
+  rect(width / 2, height / 2 + 100 * scaleY, 250 * scale, 50 * scale);
   rectMode(CORNER);
-  
+
   textFont(pixelfont);
   textAlign(CENTER, CENTER);
-  textSize(60);
+  textSize(60 * scale);
   fill(0);
-  text(`The Wild \nWild Life`, width / 2, height / 2 - 65);
-  
-  textAlign(CENTER, CENTER);
-  textSize(25);
-  fill(0);
-  text(`Protect NYC's Wildlife!`, width / 2, height / 2 + 100);
-  
-  textSize(40);
-  const b = buttonLayouts.start;
-  drawButton(b.x, b.y, b.w, b.h, "Start");
+  text(`The Wild \nWild Life`, width / 2, height / 2 - 65 * scaleY);
 
-  let textPulse = 30 + sin(millis() * 0.003) * 2
+  textSize(25 * scale);
+  fill(0);
+  text(`Protect NYC's Wildlife!`, width / 2, height / 2 + 100 * scaleY);
+
+  const b = buttonLayouts.start;
+  drawButton(b.x, b.y, b.w, b.h, "Start", 40 * scale);
+
+  let textPulse = 30 + sin(millis() * 0.003) * 2;
+  push();
   
-  //NYC banner
-  translate(width - (width / 2) + 50, height - height / 2 + 25);
+  // NYC Banner
+  translate(width / 2 + 50 * scale, height / 2 - 5 * scale);
   rotate(radians(-25));
   fill("yellow");
-  rect(0, 0, 160, 50);
+  rect(0, 0, 160 * scale, 50 * scale);
   fill(0);
-  textSize(textPulse);
+  textSize(textPulse * scale);
   textAlign(CENTER, CENTER);
-  text(`NYC Edition`, 81, 21);
+  text(`NYC Edition`, 81 * scale, 21 * scale);
+  pop();
 }
 
 function drawUsernameInputScreen() {
   background(255);
   textFont(pixelfont);
   fill(0);
-  textSize(40);
+  textSize(40 * scale);
   textAlign(CENTER, CENTER);
-  text("Enter Your Name", width / 2, height / 2 - 50);
+  text("Enter Your Name", width / 2, height / 2 - 90 * scaleY);
 
+  rectMode(CENTER);
   fill(255);
   stroke(0);
-  rect(width / 2 - 150, height / 2, 300, 50, 10);
+  rect(width / 2, height / 2 - 5 * scaleY, 250 * scaleX, 50 * scaleY, 10 * scale);
 
+  rectMode(CORNER);
   noStroke();
   fill(0);
-  textSize(30);
-  text(username || "Click To Type..", width / 2, height / 2 + 23); 
-
-  drawButton(width / 2 - 80, height / 2 + 100, 160, 60, "Continue");
+  textAlign(CENTER, CENTER);
+  textSize(30 * scale);
+  text(username || "Click To Type..", width / 2, height / 2 - 5 * scaleY); 
+  
+  const b = buttonLayouts.userName;
+  drawButton(b.x, b.y, b.w, b.h, "Continue", 30 * scale);
 }
 
 function drawGameBackground() {
@@ -477,38 +475,37 @@ function drawGameBackground() {
 function drawArrowButtons() {
   const left = arrowButtons.left;
   const right = arrowButtons.right;
-  textSize(30);
+  textSize(30 * scale);
   
   //left arrow
   fill(isMouseInside(left.x, left.y, left.w, left.h) ? "lightgrey" : "white");
-  rect(left.x, left.y, left.w, left.h, 10);
+  rect(left.x, left.y, left.w, left.h, 10 * scale);
   fill(0);
   textAlign(CENTER, CENTER);
   text("<", left.x + left.w / 2, left.y + left.h / 2 - 2);
   
   //right arrow
   fill(isMouseInside(right.x, right.y, right.w, right.h) ? "lightgrey" : "white")
-  rect(right.x, right.y, right.w, right.h, 10);
+  rect(right.x, right.y, right.w, right.h, 10 * scale);
   fill(0);
-  text(">", right.x + right.w / 2, right.y + right.h / 2 - 2);
+  text(">", right.x + right.w / 2, right.y + right.h / 2 - 2 * scaleY);
 }
-
 
 function drawInfoCard() {
   stroke(0);
   strokeWeight(2);
   fill("white")
-  rect(width / 2 - 225, height / 2 - 150, 450, 310, 15);
+  rect(width / 2 - 225 * scale, height / 2 - 150 * scale, 450 * scale, 310 * scale, 15 * scale);
   
   fill(202, 217, 237)
-  rect(width / 2 - 200, height / 2 - 125, 150, 150, 15);
+  rect(width / 2 - 200 * scale, height / 2 - 125 * scale, 150 * scale, 150 * scale, 15 * scale);
 
-  clickedAnimal.display(width / 2 - 125, height / 2 - 50, 120);
+  clickedAnimal.display(width / 2 - 125 * scale, height / 2 - 50 * scale, 120 * scale);
   
   noStroke();
   fill(0);
   textFont(pixelfont);
-  textSize(20);
+  textSize(20 * scale);
   textAlign(LEFT, TOP);
   let infoText = `Species: ${clickedAnimal.species}
                 
@@ -516,7 +513,7 @@ function drawInfoCard() {
                 
   Condition: ${clickedAnimal.condition}`;
 
-  text(infoText, width / 2 - 30, height / 2 - 100, 230);  
+  text(infoText, width / 2 - 30 * scale, height / 2 - 100 * scale, 230 * scale);
   
   const exitB = buttonLayouts.infoCard.exit;
   const rangerB = buttonLayouts.infoCard.ranger;
@@ -524,18 +521,18 @@ function drawInfoCard() {
   noStroke();
   fill(isMouseInside(exitB.x, exitB.y, exitB.w, exitB.h) ? "red" : "black");
   textAlign(CENTER, CENTER);
-  textSize(30);
+  textSize(30 * scale);
   textFont("Arial");
   text("✘", exitB.x + exitB.w / 2, exitB.y + exitB.h / 2);
   
   noStroke();
-  textSize(35);
+  textSize(35 * scale);
   fill(0);
-  text("🕻", rangerB.x - 20, rangerB.y + 23);
+  text("🕻", rangerB.x - 20 * scale, rangerB.y + 23 * scale);
   textFont(pixelfont);
   
-  textSize(23);
-  drawButton(rangerB.x, rangerB.y, rangerB.w, rangerB.h, "Call Ranger?");
+  textSize(23 * scale);
+  drawButton(rangerB.x, rangerB.y, rangerB.w, rangerB.h, "Call Ranger?", 21 * scale);
 }
 
 function drawMailLetter() {
@@ -543,49 +540,47 @@ function drawMailLetter() {
   stroke(0);
   strokeWeight(2);
   fill("white")
-  rect(width / 2 - 225, height / 2 - 150, 450, 315, 15);
+  rect(width / 2 - 225 * scale, height / 2 - 150 * scale, 450 * scale, 315 * scale, 15 * scale);
   
   fill(202, 217, 237)
-  rect(width / 2 - 200, height / 2 - 125, 150, 150, 15);
+  rect(width / 2 - 200 * scale, height / 2 - 125 * scale, 150 * scale, 150 * scale, 15 * scale);
 
   let a = mailMessage.animalData;
-  new Animal(a).display(width / 2 - 125, height / 2 - 50, 120);
+  new Animal(a).display(width / 2 - 125 * scale, height / 2 - 52 * scale, 120 * scale);
 
   noStroke();
   fill(0);
-  textSize(16)
+  textSize(16 * scale)
   textAlign(LEFT, TOP);
   
-  let wrapWidth = 250;
-  
-  text(mailMessage.text1, width / 2 - 30, height / 2 - 115, wrapWidth);
-  text(mailMessage.text2, width / 2 - 200, height / 2 + 50, wrapWidth * 2 - 83);
-  text(mailMessage.id, width / 2 - 200, height / 2 + 135);    
+  let wrapWidth = 250 * scale;
+
+  text(mailMessage.text1, width / 2 - 30 * scale, height / 2 - 115 * scale, wrapWidth);
+  text(mailMessage.text2, width / 2 - 200 * scale, height / 2 + 55 * scale, wrapWidth * 2 - 83 * scale);
+  text(mailMessage.id, width / 2 - 200 * scale, height / 2 + 135 * scale);   
 
   const b = buttonLayouts.mail;
 
   noStroke();
   fill(isMouseInside(b.x, b.y, b.w, b.h) ? "red" : "black");
   textAlign(CENTER, CENTER);
-  textSize(30);
+  textSize(30 * scale);
   textFont("Arial");
   text("✘", b.x + b.w / 2, b.y + b.h / 2);
   textFont(pixelfont);
 }
-
 
 function drawRanger() {
   const b = buttonLayouts.mailIcon;
   
   stroke(0);
   fill(202, 217, 237);
-  ellipse(b.x + b.w / 2, b.y + b.h / 2, 70, 70);
+  ellipse(b.x + b.w / 2, b.y + b.h / 2, 70 * scale, 70 * scale);
   
   imageMode(CENTER);
-  image(currentRanger, b.x + b.w / 2, b.y + b.h / 2 - 3, 180, 180);
+  image(currentRanger, b.x + b.w / 2, b.y + b.h / 2 - 3, 180 * scale, 180 * scale);
   imageMode(CORNER);
 }
-
 
 function drawMailAlertIcon() {
   stroke(0);
@@ -598,23 +593,24 @@ function drawMailAlertIcon() {
 
   noStroke();
   fill("red");
-  textSize(45);
+  textSize(45 * scale);
   textAlign(CENTER, CENTER);
   textFont("Arial");
-  text("!", b.x + 50, b.y + 10);
+  text("!", b.x + 50 * scale, b.y + 10 * scale);
   textFont(pixelfont);
 
 }
 
-function drawButton(x, y, w, h, label) {
+function drawButton(x, y, w, h, label, size) {
   stroke(0);
   strokeWeight(2);
   fill(isMouseInside(x, y, w, h) ? color(202, 217, 237) : color(73, 110, 189));
-  rect(x, y, w, h, 10);
+  rect(x, y, w, h, 10 * scale);
   fill(0);
   
   noStroke();
   textAlign(CENTER, CENTER);
+  textSize(size);
   text(label, x + w / 2, y + h / 2);
 }
 
