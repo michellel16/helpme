@@ -15,6 +15,8 @@ let rangers = 0;
 let animalSprites = [];
 let currentRanger;
 
+let maxAnimals = 3;
+
 let arrowButtons = {
   left: {x: 50 * scale, y: height / 2 - 25 * scale, w: 50 * scale, h: 50 * scale},
   right: {x: width - 50 * scale - 50 * scale, y: height / 2 - 25 * scale, w: 50 * scale, h: 50 * scale}
@@ -97,7 +99,7 @@ class Animal {
     let ymargin = 150 * scaleY;
     this.x = random(xmargin, width - xmargin);
     this.y = random(height * 0.85, height - ymargin);
-    this.size = random(50, 80) * scale;
+    this.size = random(60, 90) * scale;
   }
 
   display(x = null, y = null, size = null) {
@@ -136,6 +138,31 @@ let buttonLayouts = {
 
 function setup() {
   createCanvas(width, height);
+  updateMaxAnimals();
+}
+
+function drawCroppedBackground(img) {
+  const smallWidthThreshold = 500; // adjust as needed
+
+  if (width < smallWidthThreshold) {
+    // Small screen → crop width, keep height fixed
+    const scaleFactor = height / img.height;
+    const drawWidth = img.width * scaleFactor;
+    const drawHeight = height;
+    const offsetX = (width - drawWidth) / 2; // center horizontally
+
+    image(img, offsetX, 0, drawWidth, drawHeight);
+
+  } else {
+    // Medium / large screen → stretch to fill entire canvas
+    image(img, 0, 0, width, height);
+  }
+}
+
+
+function updateMaxAnimals() {
+  if (width < 500) maxAnimals = 3;
+  else maxAnimals = 4;
 }
 
 function draw() {
@@ -334,7 +361,7 @@ function handleMailLetter(a) {
   
   rangerMessages.push(mailMessage);
 
-  mailTimer = millis() + 0;
+  mailTimer = millis() + 10000;
 }
 
 function spawnAnimal() {
@@ -393,7 +420,7 @@ function showAnimalInfo(a) {
 
 function respawnAnimals() {
   animals = [];
-  let initialSpawnCount = random(0, 3);
+  let initialSpawnCount = random(0, maxAnimals);
   
   for (let i = 0; i < initialSpawnCount; i++) {
     spawnAnimal();
@@ -403,7 +430,7 @@ function respawnAnimals() {
 }
 
 function drawStartScreen() {
-  image(welcome, 0, 0, width, height);
+  drawCroppedBackground(welcome);
 
   fill(255, 255, 255, 150);
   rectMode(CENTER);
@@ -472,7 +499,7 @@ function drawGameBackground() {
   stroke(0);
   strokeWeight(2);
   
-  if (locations.length > 0) image(locations[currentLocation], 0, 0, width, height);
+  if (locations.length > 0) drawCroppedBackground(locations[currentLocation]);
   else background("white");
   
   drawArrowButtons();
