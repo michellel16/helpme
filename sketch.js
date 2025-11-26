@@ -125,11 +125,15 @@ let exitSize = 25 * scale;
 let exitX = cardX + cardW - exitSize - 10 * scale;
 let exitY = cardY + 20 * scale;
 
+const rangerWidth = 135 * scale;
+const rangerHeight = 40 * scale;
+
+
 let buttonLayouts = {
   start: {x: width / 2 - (160 * scale) / 2, y: height / 2 + (140 * scale),w: 160 * scale, h: 60 * scale},
   infoCard: {
     exit: {x: exitX, y: exitY, w: exitSize, h: exitSize},
-    ranger: {x: cardX + cardW / 2 - (135 * scale) / 2, y: cardY + cardH - (40 * scale) - 30 * scale, w: 135 * scale, h: 40 * scale}
+    ranger: {x: cardX + (cardW - rangerWidth) / 2, y: cardY + cardH - rangerHeight - 25 * scale, w: rangerWidth,h: rangerHeight}
   },
   mail: {x: exitX, y: exitY, w: exitSize, h: exitSize},
   mailIcon: {x: 35 * scale, y: height - 80 * scale, w: 50 * scale, h: 50 * scale},
@@ -561,7 +565,7 @@ function drawInfoCard() {
   noStroke();
   textSize(35 * scale);
   fill(0);
-  text("🕻", rangerB.x - 20 * scale, rangerB.y + 23 * scale);
+  // text("🕻", rangerB.x - 20 * scale, rangerB.y + 23 * scale);
   textFont(pixelfont);
   
   drawButton(rangerB.x, rangerB.y, rangerB.w, rangerB.h, "Call Ranger?", 21 * scale);
